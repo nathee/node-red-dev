@@ -1,0 +1,32 @@
+{
+  "name": "nodered-dev",
+  "version": "0.0.1",
+  "description": "Project for Node-RED development",
+  "main": "index.js",
+  "scripts": {
+    "start": "node-red"
+  },
+  "author": "Nathee Srina",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^3.18.0",
+    "node-red": "^3.0.0",
+    "node-red-contrib-browser-utils": "0.0.10",
+    "node-red-contrib-dashbored": "0.2.8",
+    "node-red-contrib-image-output": "0.6.3",
+    "node-red-contrib-image-tools": "2.0.4",
+    "node-red-contrib-play-audio": "2.5.0",
+    "node-red-contrib-teachable-machine": "1.3.1",
+    "node-red-contrib-tensorflow": "0.2.2",
+    "node-red-contrib-tfjs-coco-ssd": "1.0.3",
+    "node-red-contrib-tfjs-tutorial": "file:node-red-contrib-tfjs-tutorial",
+    "node-red-contrib-ui-button_state": "0.2.2",
+    "node-red-dashboard": "3.1.7",
+    "node-red-node-base64": "0.3.0",
+    "node-red-node-email": "1.15.1",
+    "node-red-node-rbe": "0.5.0",
+    "node-red-node-sqlite": "1.0.3",
+    "node-red-node-tail": "0.3.2",
+    "node-red-node-twitter": "1.2.0"
+  }
+}

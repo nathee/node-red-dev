@@ -13,7 +13,7 @@ Guessed Channel Layout for Input Stream #0.1 : mono
 Input #0, rtsp, from 'rtsp://admin:Root@1234@10.4.0.222:554':
   Metadata:
     title           : Media Server
-  Duration: N/A, start: 0.001000, bitrate: N/A
+  Duration: N/A, start: 0.000000, bitrate: N/A
   Stream #0:0: Video: h264 (Main), yuvj420p(pc, bt709, progressive), 2560x1440, 25 fps, 25 tbr, 90k tbn, 50 tbc
   Stream #0:1: Audio: pcm_alaw, 8000 Hz, mono, s16, 64 kb/s
 Please use -q:a or -q:v, -qscale is ambiguous
@@ -29,6 +29,6 @@ Output #0, image2, to '/home/pi/source/node-red-dev/grab.jpg':
       encoder         : Lavc58.134.100 mjpeg
     Side data:
       cpb: bitrate max/min/avg: 0/0/200000 buffer size: 0 vbv_delay: N/A
-frame=    1 fps=0.0 q=0.0 size=N/A time=00:00:00.00 bitrate=N/A dup=1 drop=0 speed=   0x    frame=    1 fps=0.0 q=1.0 Lsize=N/A time=00:00:00.04 bitrate=N/A dup=1 drop=1 speed=0.498x    
-video:495kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: unknown
+frame=    1 fps=0.0 q=0.0 size=N/A time=00:00:00.00 bitrate=N/A dup=1 drop=0 speed=   0x    frame=    1 fps=0.0 q=1.0 Lsize=N/A time=00:00:00.04 bitrate=N/A dup=1 drop=1 speed=0.494x    
+video:486kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: unknown
 

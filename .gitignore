@@ -3,3 +3,5 @@ node_modules
 ffmpeg.exe
 videos
 images
+.jpg
+.out

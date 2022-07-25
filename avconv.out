@@ -29,6 +29,6 @@ Output #0, image2, to '/home/pi/source/node-red-dev/grab.jpg':
       encoder         : Lavc58.134.100 mjpeg
     Side data:
       cpb: bitrate max/min/avg: 0/0/200000 buffer size: 0 vbv_delay: N/A
-frame=    1 fps=0.0 q=0.0 size=N/A time=00:00:00.00 bitrate=N/A dup=1 drop=0 speed=   0x    frame=    1 fps=0.0 q=1.0 Lsize=N/A time=00:00:00.04 bitrate=N/A dup=1 drop=1 speed=0.495x    
-video:497kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: unknown
+frame=    1 fps=0.0 q=0.0 size=N/A time=00:00:00.00 bitrate=N/A dup=1 drop=0 speed=   0x    frame=    1 fps=0.0 q=1.0 Lsize=N/A time=00:00:00.04 bitrate=N/A dup=1 drop=1 speed=0.504x    
+video:489kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: unknown
 

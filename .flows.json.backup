@@ -1,5 +1,20 @@
 [
     {
+        "id": "ed44bac9.6378a",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "a226a965c326df1a",
+        "type": "tab",
+        "label": "RTSP",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "e00b414dd22f5f63",
         "type": "tab",
         "label": "NVR",
@@ -175,6 +190,478 @@
         "width": "6",
         "collapse": false,
         "className": ""
+    },
+    {
+        "id": "32942f12.deac28",
+        "type": "tfjs-tutorial-node",
+        "z": "ed44bac9.6378a",
+        "name": "tfjs tutorial node",
+        "modelUrl": "https://tfhub.dev/tensorflow/tfjs-model/ssdlite_mobilenet_v2/1/default/1",
+        "fromHub": "checked",
+        "x": 497,
+        "y": 205,
+        "wires": [
+            [
+                "b2612289.039f4"
+            ]
+        ]
+    },
+    {
+        "id": "b2612289.039f4",
+        "type": "debug",
+        "z": "ed44bac9.6378a",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 699.5,
+        "y": 205,
+        "wires": []
+    },
+    {
+        "id": "dc828fcd.0f4f3",
+        "type": "file in",
+        "z": "ed44bac9.6378a",
+        "name": "Pilots.jpg",
+        "filename": "/Users/va/Desktop/max.test/test-images/Pilots.jpg",
+        "format": "",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "x": 299,
+        "y": 206,
+        "wires": [
+            [
+                "32942f12.deac28"
+            ]
+        ]
+    },
+    {
+        "id": "a1533ba1.954df",
+        "type": "inject",
+        "z": "ed44bac9.6378a",
+        "name": "",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "str",
+        "x": 126.5,
+        "y": 206,
+        "wires": [
+            [
+                "dc828fcd.0f4f3"
+            ]
+        ]
+    },
+    {
+        "id": "c0eaa1e3.932c2",
+        "type": "inject",
+        "z": "a226a965c326df1a",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "3",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 310,
+        "y": 300,
+        "wires": [
+            [
+                "ed28c584.34a4a8"
+            ]
+        ]
+    },
+    {
+        "id": "31b99d4b.895742",
+        "type": "exec",
+        "z": "a226a965c326df1a",
+        "command": "ffmpeg -y -i rtsp://admin:Root@1234@10.4.0.222:554 -vframes 1 -f image2pipe -vcodec png -",
+        "addpay": false,
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "Grab a frame->stdout",
+        "x": 746.4999923706055,
+        "y": 258.25,
+        "wires": [
+            [
+                "2d96cf3d.0dffe"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "2f7c77bd.2eeae8",
+        "type": "function",
+        "z": "a226a965c326df1a",
+        "name": "Statistics",
+        "func": "var now = new Date();\nvar stat = context.get(\"stat\");\nif (stat===undefined) {\n    // Initialize the object in case NR restart\n    stat = { \"count\": 0, \"success\": 0, \"rate\": 0.0, \"last\": now};\n}\nif (msg.topic===\"reset\") {\n    // Reset message was received: reset statistics\n    stat = { \"count\": 0, \"success\": 0, \"rate\": 0.0, \"last\": now};\n} else {\n    // Update statistics\n    stat.count++;\n    if (msg.payload.code===0) {\n        stat.success++;\n    }    \n    stat.rate=stat.success/stat.count;\n    stat.last=now;\n}\n\n// Create formatted time\nvar yyyy = now.getFullYear();\nvar mm = now.getMonth() < 9 ? \"0\" + (now.getMonth() + 1) : (now.getMonth() + 1); // getMonth() is zero-based\nvar dd  = now.getDate() < 10 ? \"0\" + now.getDate() : now.getDate();\nvar hh = now.getHours() < 10 ? \"0\" + now.getHours() : now.getHours();\nvar mmm  = now.getMinutes() < 10 ? \"0\" + now.getMinutes() : now.getMinutes();\nvar ss  = now.getSeconds() < 10 ? \"0\" + now.getSeconds() : now.getSeconds();\n\nmsg.formattedtime = dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss;\nmsg.success = stat.success;\nmsg.rate = Math.floor(stat.rate*100);\n\nnode.status({fill:\"blue\",shape:\"ring\",text:\"Frames: \"+msg.success+\" | \"+msg.rate+\"% | Last update: \"+dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss});\n\n\n// Saving data in the context\ncontext.set(\"stat\",stat);\n\nreturn msg;\n\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 927.9999847412109,
+        "y": 450.25,
+        "wires": [
+            [
+                "122d531a.410bcd",
+                "47913bc9.420b84",
+                "5f987014.e8cba"
+            ]
+        ]
+    },
+    {
+        "id": "b1f8f75e.c82c88",
+        "type": "inject",
+        "z": "a226a965c326df1a",
+        "name": "Reset stat",
+        "props": [
+            {
+                "p": "payload",
+                "v": "",
+                "vt": "date"
+            },
+            {
+                "p": "topic",
+                "v": "reset",
+                "vt": "string"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "topic": "reset",
+        "payload": "",
+        "payloadType": "date",
+        "x": 320,
+        "y": 440,
+        "wires": [
+            [
+                "99bfd7f8.6e8f78"
+            ]
+        ]
+    },
+    {
+        "id": "122d531a.410bcd",
+        "type": "ui_text",
+        "z": "a226a965c326df1a",
+        "group": "e16e06ca.f38438",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "Last time",
+        "label": "Last grab",
+        "format": "{{msg.formattedtime}}",
+        "layout": "row-spread",
+        "x": 1129.0000686645508,
+        "y": 370.64999198913574,
+        "wires": []
+    },
+    {
+        "id": "47913bc9.420b84",
+        "type": "ui_text",
+        "z": "a226a965c326df1a",
+        "group": "e16e06ca.f38438",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "Frame count",
+        "label": "Frames grabbed",
+        "format": "{{msg.success}}",
+        "layout": "row-spread",
+        "x": 1138.899974822998,
+        "y": 406.4499807357788,
+        "wires": []
+    },
+    {
+        "id": "5f987014.e8cba",
+        "type": "ui_text",
+        "z": "a226a965c326df1a",
+        "group": "e16e06ca.f38438",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "Success rate",
+        "label": "Success rate",
+        "format": "{{msg.rate}} %",
+        "layout": "row-spread",
+        "x": 1139.8999481201172,
+        "y": 444.4499740600586,
+        "wires": []
+    },
+    {
+        "id": "3bccc648.4f364a",
+        "type": "ui_button",
+        "z": "a226a965c326df1a",
+        "name": "Refresh",
+        "group": "675036dd.603328",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Refresh image",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "",
+        "topicType": "str",
+        "x": 320,
+        "y": 500,
+        "wires": [
+            [
+                "459f7922.af9ee8"
+            ]
+        ]
+    },
+    {
+        "id": "14f4f2e2.2bf82d",
+        "type": "comment",
+        "z": "a226a965c326df1a",
+        "name": "Frame grabber",
+        "info": "This section of the flow is responsible for \ngrabbing a single out of the RTSP feed of the IP\nCamera. It uses avconv to do that which is part\nof the libav-tools for raspberry pi.\n\nThe trigger can be an inject, or a UI button.\nThe statistic node keeps a track of the number of\ngrabbed frames and the success rate (when the\nvideo conversion/grabbing was successful). The \nStatistic node also has a reset input which can \nbe used to periodically reset the stats (e.g.\ndaily, weekly).\n\nI directed the second output of the Exec node to\na file, as the output of the avconv is usually \nquite long and if there are errors you don't\nsee the entire output in the debug window, so in\nthat case just open to output and see what the issue\nis.",
+        "x": 308.62501525878906,
+        "y": 204.00000762939453,
+        "wires": []
+    },
+    {
+        "id": "ed28c584.34a4a8",
+        "type": "change",
+        "z": "a226a965c326df1a",
+        "name": "Set filename",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "D:/Sources/dev/images/grab.jpg",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 498,
+        "y": 313,
+        "wires": [
+            [
+                "31b99d4b.895742",
+                "9ce138d8.f118c8"
+            ]
+        ]
+    },
+    {
+        "id": "6eba2f2f.5e0f",
+        "type": "template",
+        "z": "a226a965c326df1a",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<img width=\"320px\" height=\"200px\" src=\"data:image/jpg;base64,{{{payload}}}\">",
+        "output": "str",
+        "x": 939.9999961853027,
+        "y": 317.25000190734863,
+        "wires": [
+            [
+                "dd3172bd.6a821"
+            ]
+        ]
+    },
+    {
+        "id": "dd3172bd.6a821",
+        "type": "ui_template",
+        "z": "a226a965c326df1a",
+        "group": "675036dd.603328",
+        "name": "",
+        "order": 1,
+        "width": "6",
+        "height": "5",
+        "format": "<div ng-bind-html=\"msg.payload\"></div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "templateScope": "local",
+        "x": 1126,
+        "y": 330.7500009536743,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2d96cf3d.0dffe",
+        "type": "base64",
+        "z": "a226a965c326df1a",
+        "name": "",
+        "action": "str",
+        "property": "payload",
+        "x": 960,
+        "y": 240,
+        "wires": [
+            [
+                "6eba2f2f.5e0f"
+            ]
+        ]
+    },
+    {
+        "id": "9ce138d8.f118c8",
+        "type": "exec",
+        "z": "a226a965c326df1a",
+        "command": "ffmpeg -y -i rtsp://admin:Root@1234@10.4.0.222:554 -vframes 1 -qscale:v 2",
+        "addpay": "payload",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "Grab a frame -> jpg",
+        "x": 737.9999847412109,
+        "y": 375.25,
+        "wires": [
+            [],
+            [],
+            [
+                "2f7c77bd.2eeae8"
+            ]
+        ]
+    },
+    {
+        "id": "a5e46029.81ba4",
+        "type": "watch",
+        "z": "a226a965c326df1a",
+        "name": "",
+        "files": "grab.jpg",
+        "recursive": "",
+        "x": 770,
+        "y": 560,
+        "wires": [
+            [
+                "7081ec93.98cfa4"
+            ]
+        ]
+    },
+    {
+        "id": "7081ec93.98cfa4",
+        "type": "ui_text",
+        "z": "a226a965c326df1a",
+        "group": "675036dd.603328",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "File Size",
+        "label": "grab.jpg",
+        "format": "{{msg.size}} kb",
+        "layout": "row-spread",
+        "x": 1140,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "459f7922.af9ee8",
+        "type": "function",
+        "z": "a226a965c326df1a",
+        "name": "Frame grab",
+        "func": "var now = new Date();\n// Create formatted time\nvar yyyy = now.getFullYear();\nvar mm = now.getMonth() < 9 ? \"0\" + (now.getMonth() + 1) : (now.getMonth() + 1); // getMonth() is zero-based\nvar dd  = now.getDate() < 10 ? \"0\" + now.getDate() : now.getDate();\nvar hh = now.getHours() < 10 ? \"0\" + now.getHours() : now.getHours();\nvar mmm  = now.getMinutes() < 10 ? \"0\" + now.getMinutes() : now.getMinutes();\nvar ss  = now.getSeconds() < 10 ? \"0\" + now.getSeconds() : now.getSeconds();\n\n// Last update: \"+dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss});\n\n// file path with / at the end\nvar path = \"/\";                     // This is the path\nvar filename = \"frame_\"+yyyy+mm+dd+\"-\"+hh+mm+ss+\".jpg\";     // file name\nmsg.payload = path + filename;                              // pass the full path to payload for the exec node to add to the end of the command\nmsg.file = filename;                                        // To be used later to store the information in the DB\nmsg.path = path;                                            // Same as above\nmsg.wwwpath = \"/\";                                          // Same as above\nmsg.topic = \"store\";                                        // Flag to store this image in the DB\nmsg.type = \"timelapse\";                                     // Image type e.g. Front camera, etc.\nmsg.epoch = now.getTime();                                  // Current timestamp\nmsg.formatteddate = dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss;   // Formatted timestamp to be used later\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 500,
+        "wires": [
+            [
+                "9ce138d8.f118c8",
+                "54d35cc4.46d474"
+            ]
+        ]
+    },
+    {
+        "id": "54d35cc4.46d474",
+        "type": "ui_text_input",
+        "z": "a226a965c326df1a",
+        "name": "",
+        "label": "Snapshot",
+        "tooltip": "",
+        "group": "675036dd.603328",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "mode": "text",
+        "delay": 300,
+        "topic": "",
+        "x": 1130,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "31689e41.17fd82",
+        "type": "ui_button",
+        "z": "a226a965c326df1a",
+        "name": "Reset",
+        "group": "e16e06ca.f38438",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Reset",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "",
+        "x": 310,
+        "y": 400,
+        "wires": [
+            [
+                "99bfd7f8.6e8f78"
+            ]
+        ]
+    },
+    {
+        "id": "99bfd7f8.6e8f78",
+        "type": "function",
+        "z": "a226a965c326df1a",
+        "name": "Reset",
+        "func": "msg.topic = 'reset';\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 690,
+        "y": 460,
+        "wires": [
+            [
+                "2f7c77bd.2eeae8"
+            ]
+        ]
     },
     {
         "id": "ab2f48b51518962d",

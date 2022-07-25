@@ -1,18 +1,25 @@
 [
     {
+        "id": "ed44bac9.6378a",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "a226a965c326df1a",
+        "type": "tab",
+        "label": "RTSP",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "e00b414dd22f5f63",
         "type": "tab",
         "label": "NVR",
         "disabled": false,
         "info": ""
-    },
-    {
-        "id": "4e47501744fbfd2a",
-        "type": "tab",
-        "label": "OBJ",
-        "disabled": false,
-        "info": "",
-        "env": []
     },
     {
         "id": "e16e06ca.f38438",
@@ -69,8 +76,7 @@
                 "default": "#0094CE",
                 "baseColor": "#0094CE",
                 "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
-                "edited": true,
-                "reset": false
+                "edited": false
             },
             "darkTheme": {
                 "default": "#097479",
@@ -158,40 +164,76 @@
         }
     },
     {
-        "id": "552e536b6577a41c",
-        "type": "ui_tab",
-        "name": "STRM",
-        "icon": "dashboard",
-        "disabled": false,
-        "hidden": false
+        "id": "32942f12.deac28",
+        "type": "tfjs-tutorial-node",
+        "z": "ed44bac9.6378a",
+        "name": "tfjs tutorial node",
+        "modelUrl": "https://tfhub.dev/tensorflow/tfjs-model/ssdlite_mobilenet_v2/1/default/1",
+        "fromHub": "checked",
+        "x": 497,
+        "y": 205,
+        "wires": [
+            [
+                "b2612289.039f4"
+            ]
+        ]
     },
     {
-        "id": "b8a95aba32111f9e",
-        "type": "ui_group",
-        "name": "Streaming",
-        "tab": "7af2d9c8.0a9148",
-        "order": 1,
-        "disp": true,
-        "width": "6",
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "ab2f48b51518962d",
+        "id": "b2612289.039f4",
         "type": "debug",
-        "z": "e00b414dd22f5f63",
+        "z": "ed44bac9.6378a",
         "name": "",
-        "active": false,
-        "console": "false",
-        "complete": "true",
-        "x": 790,
-        "y": 360,
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 699.5,
+        "y": 205,
         "wires": []
     },
     {
-        "id": "81031827cd307af0",
+        "id": "dc828fcd.0f4f3",
+        "type": "file in",
+        "z": "ed44bac9.6378a",
+        "name": "Pilots.jpg",
+        "filename": "/Users/va/Desktop/max.test/test-images/Pilots.jpg",
+        "format": "",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "x": 299,
+        "y": 206,
+        "wires": [
+            [
+                "32942f12.deac28"
+            ]
+        ]
+    },
+    {
+        "id": "a1533ba1.954df",
         "type": "inject",
-        "z": "e00b414dd22f5f63",
+        "z": "ed44bac9.6378a",
+        "name": "",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "str",
+        "x": 126.5,
+        "y": 206,
+        "wires": [
+            [
+                "dc828fcd.0f4f3"
+            ]
+        ]
+    },
+    {
+        "id": "c0eaa1e3.932c2",
+        "type": "inject",
+        "z": "a226a965c326df1a",
         "name": "",
         "props": [
             {
@@ -202,15 +244,419 @@
                 "vt": "str"
             }
         ],
-        "repeat": "2",
+        "repeat": "",
         "crontab": "",
-        "once": true,
+        "once": false,
         "onceDelay": "",
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 130,
-        "y": 340,
+        "x": 300,
+        "y": 300,
+        "wires": [
+            [
+                "ed28c584.34a4a8"
+            ]
+        ]
+    },
+    {
+        "id": "31b99d4b.895742",
+        "type": "exec",
+        "z": "a226a965c326df1a",
+        "command": "ffmpeg -y -i rtsp://admin:Root@1234@10.4.0.222:554 -vframes 1 -f image2pipe -vcodec png -",
+        "addpay": false,
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "Grab a frame->stdout",
+        "x": 746.4999923706055,
+        "y": 258.25,
+        "wires": [
+            [
+                "2d96cf3d.0dffe"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "2f7c77bd.2eeae8",
+        "type": "function",
+        "z": "a226a965c326df1a",
+        "name": "Statistics",
+        "func": "var now = new Date();\nvar stat = context.get(\"stat\");\nif (stat===undefined) {\n    // Initialize the object in case NR restart\n    stat = { \"count\": 0, \"success\": 0, \"rate\": 0.0, \"last\": now};\n}\nif (msg.topic===\"reset\") {\n    // Reset message was received: reset statistics\n    stat = { \"count\": 0, \"success\": 0, \"rate\": 0.0, \"last\": now};\n} else {\n    // Update statistics\n    stat.count++;\n    if (msg.payload.code===0) {\n        stat.success++;\n    }    \n    stat.rate=stat.success/stat.count;\n    stat.last=now;\n}\n\n// Create formatted time\nvar yyyy = now.getFullYear();\nvar mm = now.getMonth() < 9 ? \"0\" + (now.getMonth() + 1) : (now.getMonth() + 1); // getMonth() is zero-based\nvar dd  = now.getDate() < 10 ? \"0\" + now.getDate() : now.getDate();\nvar hh = now.getHours() < 10 ? \"0\" + now.getHours() : now.getHours();\nvar mmm  = now.getMinutes() < 10 ? \"0\" + now.getMinutes() : now.getMinutes();\nvar ss  = now.getSeconds() < 10 ? \"0\" + now.getSeconds() : now.getSeconds();\n\nmsg.formattedtime = dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss;\nmsg.success = stat.success;\nmsg.rate = Math.floor(stat.rate*100);\n\nnode.status({fill:\"blue\",shape:\"ring\",text:\"Frames: \"+msg.success+\" | \"+msg.rate+\"% | Last update: \"+dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss});\n\n\n// Saving data in the context\ncontext.set(\"stat\",stat);\n\nreturn msg;\n\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 927.9999847412109,
+        "y": 450.25,
+        "wires": [
+            [
+                "122d531a.410bcd",
+                "47913bc9.420b84",
+                "5f987014.e8cba"
+            ]
+        ]
+    },
+    {
+        "id": "b1f8f75e.c82c88",
+        "type": "inject",
+        "z": "a226a965c326df1a",
+        "name": "Reset stat",
+        "props": [
+            {
+                "p": "payload",
+                "v": "",
+                "vt": "date"
+            },
+            {
+                "p": "topic",
+                "v": "reset",
+                "vt": "string"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "topic": "reset",
+        "payload": "",
+        "payloadType": "date",
+        "x": 320,
+        "y": 440,
+        "wires": [
+            [
+                "99bfd7f8.6e8f78"
+            ]
+        ]
+    },
+    {
+        "id": "122d531a.410bcd",
+        "type": "ui_text",
+        "z": "a226a965c326df1a",
+        "group": "e16e06ca.f38438",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "Last time",
+        "label": "Last grab",
+        "format": "{{msg.formattedtime}}",
+        "layout": "row-spread",
+        "x": 1129.0000686645508,
+        "y": 370.64999198913574,
+        "wires": []
+    },
+    {
+        "id": "47913bc9.420b84",
+        "type": "ui_text",
+        "z": "a226a965c326df1a",
+        "group": "e16e06ca.f38438",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "Frame count",
+        "label": "Frames grabbed",
+        "format": "{{msg.success}}",
+        "layout": "row-spread",
+        "x": 1138.899974822998,
+        "y": 406.4499807357788,
+        "wires": []
+    },
+    {
+        "id": "5f987014.e8cba",
+        "type": "ui_text",
+        "z": "a226a965c326df1a",
+        "group": "e16e06ca.f38438",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "Success rate",
+        "label": "Success rate",
+        "format": "{{msg.rate}} %",
+        "layout": "row-spread",
+        "x": 1139.8999481201172,
+        "y": 444.4499740600586,
+        "wires": []
+    },
+    {
+        "id": "3bccc648.4f364a",
+        "type": "ui_button",
+        "z": "a226a965c326df1a",
+        "name": "Refresh",
+        "group": "675036dd.603328",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Refresh image",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "",
+        "x": 320,
+        "y": 500,
+        "wires": [
+            [
+                "459f7922.af9ee8"
+            ]
+        ]
+    },
+    {
+        "id": "14f4f2e2.2bf82d",
+        "type": "comment",
+        "z": "a226a965c326df1a",
+        "name": "Frame grabber",
+        "info": "This section of the flow is responsible for \ngrabbing a single out of the RTSP feed of the IP\nCamera. It uses avconv to do that which is part\nof the libav-tools for raspberry pi.\n\nThe trigger can be an inject, or a UI button.\nThe statistic node keeps a track of the number of\ngrabbed frames and the success rate (when the\nvideo conversion/grabbing was successful). The \nStatistic node also has a reset input which can \nbe used to periodically reset the stats (e.g.\ndaily, weekly).\n\nI directed the second output of the Exec node to\na file, as the output of the avconv is usually \nquite long and if there are errors you don't\nsee the entire output in the debug window, so in\nthat case just open to output and see what the issue\nis.",
+        "x": 308.62501525878906,
+        "y": 204.00000762939453,
+        "wires": []
+    },
+    {
+        "id": "ed28c584.34a4a8",
+        "type": "change",
+        "z": "a226a965c326df1a",
+        "name": "Set filename",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "D:/Sources/dev/images/grab.jpg",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 498,
+        "y": 313,
+        "wires": [
+            [
+                "31b99d4b.895742",
+                "9ce138d8.f118c8"
+            ]
+        ]
+    },
+    {
+        "id": "6eba2f2f.5e0f",
+        "type": "template",
+        "z": "a226a965c326df1a",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<img width=\"320px\" height=\"200px\" src=\"data:image/jpg;base64,{{{payload}}}\">",
+        "output": "str",
+        "x": 939.9999961853027,
+        "y": 317.25000190734863,
+        "wires": [
+            [
+                "dd3172bd.6a821"
+            ]
+        ]
+    },
+    {
+        "id": "dd3172bd.6a821",
+        "type": "ui_template",
+        "z": "a226a965c326df1a",
+        "group": "675036dd.603328",
+        "name": "",
+        "order": 1,
+        "width": "6",
+        "height": "5",
+        "format": "<div ng-bind-html=\"msg.payload\"></div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "templateScope": "local",
+        "x": 1126,
+        "y": 330.7500009536743,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2d96cf3d.0dffe",
+        "type": "base64",
+        "z": "a226a965c326df1a",
+        "name": "",
+        "action": "str",
+        "property": "payload",
+        "x": 960,
+        "y": 240,
+        "wires": [
+            [
+                "6eba2f2f.5e0f"
+            ]
+        ]
+    },
+    {
+        "id": "9ce138d8.f118c8",
+        "type": "exec",
+        "z": "a226a965c326df1a",
+        "command": "ffmpeg -y -i rtsp://admin:Root@1234@10.4.0.222:554 -vframes 1 -qscale:v 2",
+        "addpay": "payload",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "Grab a frame -> jpg",
+        "x": 737.9999847412109,
+        "y": 375.25,
+        "wires": [
+            [],
+            [],
+            [
+                "2f7c77bd.2eeae8"
+            ]
+        ]
+    },
+    {
+        "id": "a5e46029.81ba4",
+        "type": "watch",
+        "z": "a226a965c326df1a",
+        "name": "",
+        "files": "D:/Sources/dev/images/grab.jpg",
+        "recursive": "",
+        "x": 840,
+        "y": 560,
+        "wires": [
+            [
+                "7081ec93.98cfa4"
+            ]
+        ]
+    },
+    {
+        "id": "7081ec93.98cfa4",
+        "type": "ui_text",
+        "z": "a226a965c326df1a",
+        "group": "675036dd.603328",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "File Size",
+        "label": "grab.jpg",
+        "format": "{{msg.size}} kb",
+        "layout": "row-spread",
+        "x": 1140,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "459f7922.af9ee8",
+        "type": "function",
+        "z": "a226a965c326df1a",
+        "name": "Frame grab",
+        "func": "var now = new Date();\n// Create formatted time\nvar yyyy = now.getFullYear();\nvar mm = now.getMonth() < 9 ? \"0\" + (now.getMonth() + 1) : (now.getMonth() + 1); // getMonth() is zero-based\nvar dd  = now.getDate() < 10 ? \"0\" + now.getDate() : now.getDate();\nvar hh = now.getHours() < 10 ? \"0\" + now.getHours() : now.getHours();\nvar mmm  = now.getMinutes() < 10 ? \"0\" + now.getMinutes() : now.getMinutes();\nvar ss  = now.getSeconds() < 10 ? \"0\" + now.getSeconds() : now.getSeconds();\n\n// Last update: \"+dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss});\n\n// file path with / at the end\nvar path = \"/\";                     // This is the path\nvar filename = \"frame_\"+yyyy+mm+dd+\"-\"+hh+mm+ss+\".jpg\";     // file name\nmsg.payload = path + filename;                              // pass the full path to payload for the exec node to add to the end of the command\nmsg.file = filename;                                        // To be used later to store the information in the DB\nmsg.path = path;                                            // Same as above\nmsg.wwwpath = \"/\";                                          // Same as above\nmsg.topic = \"store\";                                        // Flag to store this image in the DB\nmsg.type = \"timelapse\";                                     // Image type e.g. Front camera, etc.\nmsg.epoch = now.getTime();                                  // Current timestamp\nmsg.formatteddate = dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss;   // Formatted timestamp to be used later\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 500,
+        "wires": [
+            [
+                "9ce138d8.f118c8",
+                "54d35cc4.46d474"
+            ]
+        ]
+    },
+    {
+        "id": "54d35cc4.46d474",
+        "type": "ui_text_input",
+        "z": "a226a965c326df1a",
+        "name": "",
+        "label": "Snapshot",
+        "tooltip": "",
+        "group": "675036dd.603328",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "mode": "text",
+        "delay": 300,
+        "topic": "",
+        "x": 1130,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "31689e41.17fd82",
+        "type": "ui_button",
+        "z": "a226a965c326df1a",
+        "name": "Reset",
+        "group": "e16e06ca.f38438",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Reset",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "",
+        "x": 310,
+        "y": 400,
+        "wires": [
+            [
+                "99bfd7f8.6e8f78"
+            ]
+        ]
+    },
+    {
+        "id": "99bfd7f8.6e8f78",
+        "type": "function",
+        "z": "a226a965c326df1a",
+        "name": "Reset",
+        "func": "msg.topic = 'reset';\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 690,
+        "y": 460,
+        "wires": [
+            [
+                "2f7c77bd.2eeae8"
+            ]
+        ]
+    },
+    {
+        "id": "ab2f48b51518962d",
+        "type": "debug",
+        "z": "e00b414dd22f5f63",
+        "name": "",
+        "active": false,
+        "console": "false",
+        "complete": "true",
+        "x": 770,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "81031827cd307af0",
+        "type": "inject",
+        "z": "e00b414dd22f5f63",
+        "name": "",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 100,
+        "y": 140,
         "wires": [
             [
                 "fe26da3894e710ee"
@@ -229,8 +675,8 @@
         "winHide": false,
         "oldrc": false,
         "name": "Grab a frame",
-        "x": 550,
-        "y": 280,
+        "x": 530,
+        "y": 80,
         "wires": [
             [
                 "85e0637de6e67ac2",
@@ -254,14 +700,14 @@
         "order": 2,
         "width": 0,
         "height": 0,
-        "format": "<div height=\"210\" style=\"height: 210px;\">\n<img src=\"/grab.jpg\"/ width=\"280\"><br/>\n<a href=\"/grab.jpg\" target=\"_blank\">Full screen</a>\n</div>",
+        "format": "<div height=\"210\" style=\"height: 210px;\">\n<img src=\"grab.jpg\"/ width=\"280\"><br/>\n<a href=\"grab.jpg\" target=\"_blank\">Full screen</a>\n</div>",
         "storeOutMessages": true,
         "fwdInMessages": true,
         "resendOnRefresh": false,
         "templateScope": "local",
         "className": "",
-        "x": 810,
-        "y": 240,
+        "x": 790,
+        "y": 40,
         "wires": [
             []
         ]
@@ -274,8 +720,8 @@
         "active": false,
         "console": "false",
         "complete": "true",
-        "x": 790,
-        "y": 280,
+        "x": 770,
+        "y": 80,
         "wires": []
     },
     {
@@ -288,8 +734,8 @@
         "appendNewline": true,
         "createDir": false,
         "overwriteFile": "true",
-        "x": 850,
-        "y": 320,
+        "x": 830,
+        "y": 120,
         "wires": [
             []
         ]
@@ -305,8 +751,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 700,
-        "y": 480,
+        "x": 680,
+        "y": 280,
         "wires": [
             [
                 "f6429c1f7c6c18c5",
@@ -320,26 +766,14 @@
         "type": "inject",
         "z": "e00b414dd22f5f63",
         "name": "Reset stat",
-        "props": [
-            {
-                "p": "payload",
-                "v": "",
-                "vt": "date"
-            },
-            {
-                "p": "topic",
-                "v": "reset",
-                "vt": "str"
-            }
-        ],
         "repeat": "",
         "crontab": "",
         "once": false,
         "topic": "reset",
         "payload": "",
         "payloadType": "date",
-        "x": 600,
-        "y": 600,
+        "x": 580,
+        "y": 400,
         "wires": [
             [
                 "e726fd8cc0685c9b"
@@ -358,8 +792,8 @@
         "label": "Last grab",
         "format": "{{msg.formattedtime}}",
         "layout": "row-spread",
-        "x": 901.0000839233398,
-        "y": 400.39999198913574,
+        "x": 881.0000839233398,
+        "y": 200.39999198913574,
         "wires": []
     },
     {
@@ -374,8 +808,8 @@
         "label": "Frames grabbed",
         "format": "{{msg.success}}",
         "layout": "row-spread",
-        "x": 910.8999900817871,
-        "y": 436.1999807357788,
+        "x": 890.8999900817871,
+        "y": 236.1999807357788,
         "wires": []
     },
     {
@@ -390,8 +824,8 @@
         "label": "Success rate",
         "format": "{{msg.rate}} %",
         "layout": "row-spread",
-        "x": 911.8999633789062,
-        "y": 474.1999740600586,
+        "x": 891.8999633789062,
+        "y": 274.1999740600586,
         "wires": []
     },
     {
@@ -405,17 +839,14 @@
         "height": 0,
         "passthru": false,
         "label": "Refresh image",
-        "tooltip": "",
         "color": "",
         "bgcolor": "",
-        "className": "",
         "icon": "",
         "payload": "",
         "payloadType": "str",
         "topic": "",
-        "topicType": "str",
-        "x": 104.59999084472656,
-        "y": 294.13333797454834,
+        "x": 84.59999084472656,
+        "y": 94.13333797454834,
         "wires": [
             [
                 "fe26da3894e710ee"
@@ -430,8 +861,8 @@
         "active": true,
         "console": "false",
         "complete": "true",
-        "x": 798.0000152587891,
-        "y": 1240.0000228881836,
+        "x": 778.0000152587891,
+        "y": 1040.0000228881836,
         "wires": []
     },
     {
@@ -445,8 +876,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 148.00001525878906,
-        "y": 1200.0000228881836,
+        "x": 128.00001525878906,
+        "y": 1000.0000228881836,
         "wires": [
             [
                 "157fa6faa1fd97b0"
@@ -465,13 +896,12 @@
         "winHide": false,
         "oldrc": false,
         "name": "Capture video",
-        "x": 568.0000152587891,
-        "y": 1160.0000228881836,
+        "x": 548.0000152587891,
+        "y": 960.0000228881836,
         "wires": [
             [
                 "83275e9c15ccb1dc",
-                "5505f3325196a13f",
-                "32b831e36cdbd6ae"
+                "5505f3325196a13f"
             ],
             [
                 "f83b7f6f9f61ee69"
@@ -491,14 +921,14 @@
         "order": 2,
         "width": 0,
         "height": 0,
-        "format": "<div height=\"500\" style=\"height: 500px;\">\n    <video width=\"768\" height=\"1024\" controls>\n        <source src=\"/video.mp4\" type=\"video/mp4\">\n    </video>\n<a href=\"/video.mp4\" target=\"_blank\">Open video</a>\n</div>",
+        "format": "<div height=\"70\" style=\"height: 70px;\">\n<a href=\"/video.mp4\" target=\"_blank\">Open video</a>\n</div>",
         "storeOutMessages": true,
         "fwdInMessages": true,
         "resendOnRefresh": false,
         "templateScope": "local",
         "className": "",
-        "x": 808.0000152587891,
-        "y": 1120.0000228881836,
+        "x": 788.0000152587891,
+        "y": 920.0000228881836,
         "wires": [
             []
         ]
@@ -511,8 +941,8 @@
         "active": true,
         "console": "false",
         "complete": "true",
-        "x": 798.0000152587891,
-        "y": 1160.0000228881836,
+        "x": 778.0000152587891,
+        "y": 960.0000228881836,
         "wires": []
     },
     {
@@ -525,8 +955,8 @@
         "appendNewline": true,
         "createDir": false,
         "overwriteFile": "true",
-        "x": 858.0000152587891,
-        "y": 1200.0000228881836,
+        "x": 838.0000152587891,
+        "y": 1000.0000228881836,
         "wires": [
             []
         ]
@@ -542,8 +972,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 688.0000152587891,
-        "y": 1360.0000228881836,
+        "x": 668.0000152587891,
+        "y": 1160.0000228881836,
         "wires": [
             [
                 "876fe5361892b63f",
@@ -563,8 +993,8 @@
         "topic": "reset",
         "payload": "",
         "payloadType": "date",
-        "x": 488.00001525878906,
-        "y": 1360.0000228881836,
+        "x": 468.00001525878906,
+        "y": 1160.0000228881836,
         "wires": [
             [
                 "9a0dd355f17a1867"
@@ -583,8 +1013,8 @@
         "label": "Last grab",
         "format": "{{msg.formattedtime}}",
         "layout": "row-spread",
-        "x": 908.0000152587891,
-        "y": 1280.0000228881836,
+        "x": 888.0000152587891,
+        "y": 1080.0000228881836,
         "wires": []
     },
     {
@@ -599,8 +1029,8 @@
         "label": "Video files",
         "format": "{{msg.success}}",
         "layout": "row-spread",
-        "x": 898.0000152587891,
-        "y": 1320.0000228881836,
+        "x": 878.0000152587891,
+        "y": 1120.0000228881836,
         "wires": []
     },
     {
@@ -615,8 +1045,8 @@
         "label": "Success rate",
         "format": "{{msg.rate}} %",
         "layout": "row-spread",
-        "x": 918.0000152587891,
-        "y": 1360.0000228881836,
+        "x": 898.0000152587891,
+        "y": 1160.0000228881836,
         "wires": []
     },
     {
@@ -636,8 +1066,8 @@
         "payload": "",
         "payloadType": "str",
         "topic": "",
-        "x": 132.60000610351562,
-        "y": 1154.133360862732,
+        "x": 112.60000610351562,
+        "y": 954.1333608627319,
         "wires": [
             [
                 "157fa6faa1fd97b0"
@@ -650,8 +1080,8 @@
         "z": "e00b414dd22f5f63",
         "name": "Frame grabber",
         "info": "This section of the flow is responsible for \ngrabbing a single out of the RTSP feed of the IP\nCamera. It uses avconv to do that which is part\nof the libav-tools for raspberry pi.\n\nThe trigger can be an inject, or a UI button.\nThe statistic node keeps a track of the number of\ngrabbed frames and the success rate (when the\nvideo conversion/grabbing was successful). The \nStatistic node also has a reset input which can \nbe used to periodically reset the stats (e.g.\ndaily, weekly).\n\nI directed the second output of the Exec node to\na file, as the output of the avconv is usually \nquite long and if there are errors you don't\nsee the entire output in the debug window, so in\nthat case just open to output and see what the issue\nis.",
-        "x": 145.625,
-        "y": 236.5000057220459,
+        "x": 125.625,
+        "y": 36.5000057220459,
         "wires": []
     },
     {
@@ -660,8 +1090,8 @@
         "z": "e00b414dd22f5f63",
         "name": "Video capture",
         "info": "This section of the flow captures a fixed length \nvideo of the RTSP feed.\nIt works very similar to the frame capture above,\nthe only main difference is the parameters in the\ncommmand line.",
-        "x": 138.00001525878906,
-        "y": 1100.0000228881836,
+        "x": 118.00001525878906,
+        "y": 900.0000228881836,
         "wires": []
     },
     {
@@ -683,8 +1113,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 310,
-        "y": 280,
+        "x": 290,
+        "y": 80,
         "wires": [
             [
                 "8ce13d405dce0ff5"
@@ -710,8 +1140,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 318.00001525878906,
-        "y": 1160.0000228881836,
+        "x": 298.00001525878906,
+        "y": 960.0000228881836,
         "wires": [
             [
                 "cfab957f51d788e8"
@@ -729,8 +1159,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 330,
-        "y": 580,
+        "x": 310,
+        "y": 380,
         "wires": [
             [
                 "8ce13d405dce0ff5"
@@ -744,22 +1174,24 @@
         "name": "Grab a frame",
         "props": [
             {
-                "p": "payload"
+                "p": "payload",
+                "v": "",
+                "vt": "date"
             },
             {
                 "p": "topic",
+                "v": "",
                 "vt": "str"
             }
         ],
         "repeat": "",
         "crontab": "",
         "once": false,
-        "onceDelay": "",
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 150,
-        "y": 580,
+        "x": 130,
+        "y": 380,
         "wires": [
             [
                 "299083a6223fdf73"
@@ -777,8 +1209,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 348.00001525878906,
-        "y": 1280.0000228881836,
+        "x": 328.00001525878906,
+        "y": 1080.0000228881836,
         "wires": [
             [
                 "cfab957f51d788e8"
@@ -806,8 +1238,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 148.00001525878906,
-        "y": 1280.0000228881836,
+        "x": 128.00001525878906,
+        "y": 1080.0000228881836,
         "wires": [
             [
                 "ef72e9b41baf0731"
@@ -819,14 +1251,14 @@
         "type": "function",
         "z": "e00b414dd22f5f63",
         "name": "Email image",
-        "func": "var now = new Date();\n// Create formatted time\nvar yyyy = now.getFullYear();\nvar mm = now.getMonth() < 9 ? \"0\" + (now.getMonth() + 1) : (now.getMonth() + 1); // getMonth() is zero-based\nvar dd  = now.getDate() < 10 ? \"0\" + now.getDate() : now.getDate();\nvar hh = now.getHours() < 10 ? \"0\" + now.getHours() : now.getHours();\nvar mmm  = now.getMinutes() < 10 ? \"0\" + now.getMinutes() : now.getMinutes();\nvar ss  = now.getSeconds() < 10 ? \"0\" + now.getSeconds() : now.getSeconds();\n\n// Last update: \"+dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss});\n\n// file path with / at the end\nvar path = \"/home/pi/source/node-red-dev/\";                     // This is the path\nvar filename = \"frame_\"+yyyy+mm+dd+\"-\"+hh+mm+ss+\".jpg\";     // file name\nmsg.payload = path + filename;                              // pass the full path to payload for the exec node to add to the end of the command\nmsg.file = filename;                                        // To be used later to store the information in the DB\nmsg.path = path;                                            // Same as above\nmsg.wwwpath = \"/\";                                          // Same as above\nmsg.topic = \"store|email\";                                  // Flag to store this image in the DB\nmsg.type = \"front\";                                         // Image type e.g. Front camera, etc.\nmsg.epoch = now.getTime();                                  // Current timestamp\nmsg.formatteddate = dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss;   // Formatted timestamp to be used later\n\nreturn msg;",
+        "func": "var now = new Date();\n// Create formatted time\nvar yyyy = now.getFullYear();\nvar mm = now.getMonth() < 9 ? \"0\" + (now.getMonth() + 1) : (now.getMonth() + 1); // getMonth() is zero-based\nvar dd  = now.getDate() < 10 ? \"0\" + now.getDate() : now.getDate();\nvar hh = now.getHours() < 10 ? \"0\" + now.getHours() : now.getHours();\nvar mmm  = now.getMinutes() < 10 ? \"0\" + now.getMinutes() : now.getMinutes();\nvar ss  = now.getSeconds() < 10 ? \"0\" + now.getSeconds() : now.getSeconds();\n\n// Last update: \"+dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss});\n\n// file path with / at the end\nvar path = \"/\";                     // This is the path\nvar filename = \"frame_\"+yyyy+mm+dd+\"-\"+hh+mm+ss+\".jpg\";     // file name\nmsg.payload = path + filename;                              // pass the full path to payload for the exec node to add to the end of the command\nmsg.file = filename;                                        // To be used later to store the information in the DB\nmsg.path = path;                                            // Same as above\nmsg.wwwpath = \"/\";                                          // Same as above\nmsg.topic = \"store|email\";                                  // Flag to store this image in the DB\nmsg.type = \"front\";                                         // Image type e.g. Front camera, etc.\nmsg.epoch = now.getTime();                                  // Current timestamp\nmsg.formatteddate = dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss;   // Formatted timestamp to be used later\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 330,
-        "y": 620,
+        "x": 310,
+        "y": 420,
         "wires": [
             [
                 "8ce13d405dce0ff5"
@@ -856,8 +1288,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 140,
-        "y": 620,
+        "x": 120,
+        "y": 420,
         "wires": [
             [
                 "7c0fcce0fdf7112b"
@@ -887,8 +1319,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 150,
-        "y": 660,
+        "x": 130,
+        "y": 460,
         "wires": [
             [
                 "f9151a7b23180477"
@@ -900,14 +1332,14 @@
         "type": "function",
         "z": "e00b414dd22f5f63",
         "name": "1st img",
-        "func": "var now = new Date();\n// Create formatted time\nvar yyyy = now.getFullYear();\nvar mm = now.getMonth() < 9 ? \"0\" + (now.getMonth() + 1) : (now.getMonth() + 1); // getMonth() is zero-based\nvar dd  = now.getDate() < 10 ? \"0\" + now.getDate() : now.getDate();\nvar hh = now.getHours() < 10 ? \"0\" + now.getHours() : now.getHours();\nvar mmm  = now.getMinutes() < 10 ? \"0\" + now.getMinutes() : now.getMinutes();\nvar ss  = now.getSeconds() < 10 ? \"0\" + now.getSeconds() : now.getSeconds();\n\n// Last update: \"+dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss});\n\n// file path with / at the end\nvar path = \"/home/pi/source/node-red-dev/\";                     // This is the path\nvar filename = \"frame_\"+yyyy+mm+dd+\"-\"+hh+mm+ss+\".jpg\";     // file name\nmsg.payload = path + filename;                              // pass the full path to payload for the exec node to add to the end of the command\nmsg.file = filename;                                        // To be used later to store the information in the DB\nmsg.path = path;                                            // Same as above\nmsg.wwwpath = \"/\";                                          // Same as above\nmsg.topic = \"3mail/1|delete\";                               // Flag to store this image in the DB\nmsg.type = \"temp\";                                          // Image type e.g. Front camera, etc.\nmsg.epoch = now.getTime();                                  // Current timestamp\nmsg.formatteddate = dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss;   // Formatted timestamp to be used later\n\nreturn msg;",
+        "func": "var now = new Date();\n// Create formatted time\nvar yyyy = now.getFullYear();\nvar mm = now.getMonth() < 9 ? \"0\" + (now.getMonth() + 1) : (now.getMonth() + 1); // getMonth() is zero-based\nvar dd  = now.getDate() < 10 ? \"0\" + now.getDate() : now.getDate();\nvar hh = now.getHours() < 10 ? \"0\" + now.getHours() : now.getHours();\nvar mmm  = now.getMinutes() < 10 ? \"0\" + now.getMinutes() : now.getMinutes();\nvar ss  = now.getSeconds() < 10 ? \"0\" + now.getSeconds() : now.getSeconds();\n\n// Last update: \"+dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss});\n\n// file path with / at the end\nvar path = \"/\";                     // This is the path\nvar filename = \"frame_\"+yyyy+mm+dd+\"-\"+hh+mm+ss+\".jpg\";     // file name\nmsg.payload = path + filename;                              // pass the full path to payload for the exec node to add to the end of the command\nmsg.file = filename;                                        // To be used later to store the information in the DB\nmsg.path = path;                                            // Same as above\nmsg.wwwpath = \"/\";                                          // Same as above\nmsg.topic = \"3mail/1|delete\";                               // Flag to store this image in the DB\nmsg.type = \"temp\";                                          // Image type e.g. Front camera, etc.\nmsg.epoch = now.getTime();                                  // Current timestamp\nmsg.formatteddate = dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss;   // Formatted timestamp to be used later\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 320,
-        "y": 660,
+        "x": 300,
+        "y": 460,
         "wires": [
             [
                 "e3eb5d35512ffe18",
@@ -920,14 +1352,14 @@
         "type": "function",
         "z": "e00b414dd22f5f63",
         "name": "2st img",
-        "func": "var now = new Date();\n// Create formatted time\nvar yyyy = now.getFullYear();\nvar mm = now.getMonth() < 9 ? \"0\" + (now.getMonth() + 1) : (now.getMonth() + 1); // getMonth() is zero-based\nvar dd  = now.getDate() < 10 ? \"0\" + now.getDate() : now.getDate();\nvar hh = now.getHours() < 10 ? \"0\" + now.getHours() : now.getHours();\nvar mmm  = now.getMinutes() < 10 ? \"0\" + now.getMinutes() : now.getMinutes();\nvar ss  = now.getSeconds() < 10 ? \"0\" + now.getSeconds() : now.getSeconds();\n\n// Last update: \"+dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss});\n\n// file path with / at the end\nvar path = \"/home/pi/source/node-red-dev/\";                     // This is the path\nvar filename = \"frame_\"+yyyy+mm+dd+\"-\"+hh+mm+ss+\".jpg\";     // file name\nmsg.payload = path + filename;                              // pass the full path to payload for the exec node to add to the end of the command\nmsg.file = filename;                                        // To be used later to store the information in the DB\nmsg.path = path;                                            // Same as above\nmsg.wwwpath = \"/\";                                          // Same as above\nmsg.topic = \"3mail/2|delete\";                               // Flag to store this image in the DB\nmsg.type = \"temp\";                                          // Image type e.g. Front camera, etc.\nmsg.epoch = now.getTime();                                  // Current timestamp\nmsg.formatteddate = dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss;   // Formatted timestamp to be used later\n\nreturn msg;",
+        "func": "var now = new Date();\n// Create formatted time\nvar yyyy = now.getFullYear();\nvar mm = now.getMonth() < 9 ? \"0\" + (now.getMonth() + 1) : (now.getMonth() + 1); // getMonth() is zero-based\nvar dd  = now.getDate() < 10 ? \"0\" + now.getDate() : now.getDate();\nvar hh = now.getHours() < 10 ? \"0\" + now.getHours() : now.getHours();\nvar mmm  = now.getMinutes() < 10 ? \"0\" + now.getMinutes() : now.getMinutes();\nvar ss  = now.getSeconds() < 10 ? \"0\" + now.getSeconds() : now.getSeconds();\n\n// Last update: \"+dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss});\n\n// file path with / at the end\nvar path = \"/\";                     // This is the path\nvar filename = \"frame_\"+yyyy+mm+dd+\"-\"+hh+mm+ss+\".jpg\";     // file name\nmsg.payload = path + filename;                              // pass the full path to payload for the exec node to add to the end of the command\nmsg.file = filename;                                        // To be used later to store the information in the DB\nmsg.path = path;                                            // Same as above\nmsg.wwwpath = \"/\";                                          // Same as above\nmsg.topic = \"3mail/2|delete\";                               // Flag to store this image in the DB\nmsg.type = \"temp\";                                          // Image type e.g. Front camera, etc.\nmsg.epoch = now.getTime();                                  // Current timestamp\nmsg.formatteddate = dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss;   // Formatted timestamp to be used later\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 320,
-        "y": 720,
+        "x": 300,
+        "y": 520,
         "wires": [
             [
                 "df0eeb5452f24cab",
@@ -940,14 +1372,14 @@
         "type": "function",
         "z": "e00b414dd22f5f63",
         "name": "3rd img",
-        "func": "var now = new Date();\n// Create formatted time\nvar yyyy = now.getFullYear();\nvar mm = now.getMonth() < 9 ? \"0\" + (now.getMonth() + 1) : (now.getMonth() + 1); // getMonth() is zero-based\nvar dd  = now.getDate() < 10 ? \"0\" + now.getDate() : now.getDate();\nvar hh = now.getHours() < 10 ? \"0\" + now.getHours() : now.getHours();\nvar mmm  = now.getMinutes() < 10 ? \"0\" + now.getMinutes() : now.getMinutes();\nvar ss  = now.getSeconds() < 10 ? \"0\" + now.getSeconds() : now.getSeconds();\n\n// Last update: \"+dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss});\n\n// file path with / at the end\nvar path = \"/home/pi/source/node-red-dev/\";                     // This is the path\nvar filename = \"frame_\"+yyyy+mm+dd+\"-\"+hh+mm+ss+\".jpg\";     // file name\nmsg.payload = path + filename;                              // pass the full path to payload for the exec node to add to the end of the command\nmsg.file = filename;                                        // To be used later to store the information in the DB\nmsg.path = path;                                            // Same as above\nmsg.wwwpath = \"/\";                                          // Same as above\nmsg.topic = \"3mail/3|delete\";                               // Flag to store this image in the DB\nmsg.type = \"temp\";                                          // Image type e.g. Front camera, etc.\nmsg.epoch = now.getTime();                                  // Current timestamp\nmsg.formatteddate = dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss;   // Formatted timestamp to be used later\n\nreturn msg;",
+        "func": "var now = new Date();\n// Create formatted time\nvar yyyy = now.getFullYear();\nvar mm = now.getMonth() < 9 ? \"0\" + (now.getMonth() + 1) : (now.getMonth() + 1); // getMonth() is zero-based\nvar dd  = now.getDate() < 10 ? \"0\" + now.getDate() : now.getDate();\nvar hh = now.getHours() < 10 ? \"0\" + now.getHours() : now.getHours();\nvar mmm  = now.getMinutes() < 10 ? \"0\" + now.getMinutes() : now.getMinutes();\nvar ss  = now.getSeconds() < 10 ? \"0\" + now.getSeconds() : now.getSeconds();\n\n// Last update: \"+dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss});\n\n// file path with / at the end\nvar path = \"/\";                     // This is the path\nvar filename = \"frame_\"+yyyy+mm+dd+\"-\"+hh+mm+ss+\".jpg\";     // file name\nmsg.payload = path + filename;                              // pass the full path to payload for the exec node to add to the end of the command\nmsg.file = filename;                                        // To be used later to store the information in the DB\nmsg.path = path;                                            // Same as above\nmsg.wwwpath = \"/\";                                          // Same as above\nmsg.topic = \"3mail/3|delete\";                               // Flag to store this image in the DB\nmsg.type = \"temp\";                                          // Image type e.g. Front camera, etc.\nmsg.epoch = now.getTime();                                  // Current timestamp\nmsg.formatteddate = dd + \".\" + mm + \".\" + yyyy + \" \" + hh + \":\" + mmm + \":\" + ss;   // Formatted timestamp to be used later\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 320,
-        "y": 780,
+        "x": 300,
+        "y": 580,
         "wires": [
             [
                 "8ce13d405dce0ff5"
@@ -970,8 +1402,8 @@
         "randomUnits": "seconds",
         "drop": false,
         "outputs": 1,
-        "x": 160,
-        "y": 720,
+        "x": 140,
+        "y": 520,
         "wires": [
             [
                 "880b442c94be7c9d"
@@ -994,8 +1426,8 @@
         "randomUnits": "seconds",
         "drop": false,
         "outputs": 1,
-        "x": 160,
-        "y": 780,
+        "x": 140,
+        "y": 580,
         "wires": [
             [
                 "86c8773ef792557e"
@@ -1025,8 +1457,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 158,
-        "y": 906,
+        "x": 138,
+        "y": 706,
         "wires": [
             [
                 "9ca1d1bdc86ea197"
@@ -1044,33 +1476,12 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 328,
-        "y": 906,
+        "x": 308,
+        "y": 706,
         "wires": [
             [
                 "8ce13d405dce0ff5"
             ]
-        ]
-    },
-    {
-        "id": "32b831e36cdbd6ae",
-        "type": "ui_template",
-        "z": "e00b414dd22f5f63",
-        "group": "b8a95aba32111f9e",
-        "name": "VDO",
-        "order": 6,
-        "width": 0,
-        "height": 0,
-        "format": "<div>\n    <video width=\"auto\" height=\"auto\" controls>\n        <source src=\"rtsp://admin:Root@1234@10.4.0.222:554\" type=\"video/mp4\">\n    </video>\n</div>",
-        "storeOutMessages": true,
-        "fwdInMessages": true,
-        "resendOnRefresh": true,
-        "templateScope": "local",
-        "className": "",
-        "x": 790,
-        "y": 1040,
-        "wires": [
-            []
         ]
     }
 ]
